@@ -1,4 +1,0 @@
-streamlit
-transformers
-nltk
-language-tool-python
