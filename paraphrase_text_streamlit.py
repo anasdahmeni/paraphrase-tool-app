@@ -1,6 +1,4 @@
-# Write the updated script to /kaggle/working/
-with open("/kaggle/working/paraphrase_text_streamlit.py", "w") as f:
-    f.write('''import streamlit as st
+import streamlit as st
 import os
 import nltk
 import language_tool_python
@@ -150,11 +148,3 @@ if st.button("Paraphrase"):
                 logger.error(f"Paraphrasing error: {str(e)}")
     else:
         st.error("Please enter some text to paraphrase.")
-''')
-
-# Verify the script was saved
-script_path = "/kaggle/working/paraphrase_text_streamlit.py"
-if os.path.exists(script_path):
-    print(f"The updated script {script_path} is now saved successfully.")
-else:
-    print(f"The updated script {script_path} could not be saved. There may be an issue with writing the file.")
