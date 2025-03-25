@@ -27,8 +27,8 @@ def download_dataset_from_kaggle():
         logger.info("Starting dataset download from Kaggle...")
         
         # Retrieve Kaggle API credentials from environment variables
-        kaggle_username = os.getenv('KAGGLE_USERNAME')
-        kaggle_key = os.getenv('KAGGLE_KEY')
+        kaggle_username = os.getenv('anasdahmani')
+        kaggle_key = os.getenv('0b83427b3c4f6614b470ef6d1b0460f6')
         
         # Log the credentials (for debugging, without exposing the key)
         logger.info(f"KAGGLE_USERNAME: {'Set' if kaggle_username else 'Not set'}")
