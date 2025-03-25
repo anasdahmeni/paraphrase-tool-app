@@ -5,3 +5,4 @@ nltk==3.9.1
 language-tool-python==2.8.1
 accelerate==0.34.2
 gdown==5.2.0
+sentencepiece==0.2.0
