@@ -3,3 +3,4 @@ transformers==4.44.2
 torch==2.4.1
 nltk==3.9.1
 language-tool-python==2.8.1
+accelerate==0.34.2
