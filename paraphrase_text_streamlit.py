@@ -15,7 +15,7 @@ nltk.download('punkt', quiet=True)
 logger.info("NLTK punkt data downloaded successfully.")
 
 # Set up paths
-dataset_path = "https://huggingface.co/spaces/oniel2020/paraphrase-tool-app/tree/main"  # Updated path to the root directory
+dataset_path = "/mount/src/paraphrase-tool-app"  # Updated path to the root directory
 
 # Load the model and tokenizer
 @st.cache_resource
