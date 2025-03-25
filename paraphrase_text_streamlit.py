@@ -7,6 +7,15 @@ import logging
 import gdown
 import time
 
+# Check if sentencepiece is installed
+try:
+    import sentencepiece
+    st.write("SentencePiece is installed successfully.")
+    logger.info("SentencePiece is installed successfully.")
+except ImportError:
+    st.error("SentencePiece is not installed. Please add 'sentencepiece' to requirements.txt and restart the Space.")
+    raise ImportError("SentencePiece is not installed. Please add 'sentencepiece' to requirements.txt and restart the Space.")
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,7 +42,7 @@ def download_model_files():
     try:
         # Replace with your Google Drive folder ID
         folder_id = "1Ab-vaLKkrv0eflaVS-F1s1C3-IWaXR1I"  # Extracted from the logs
-        url = f"https://drive.google.com/drive/folders/1dCTBzHbQcJca9Bub2gyYgrFfkW5Qj59l?usp=drive_link"
+        url = f"https://drive.google.com/drive/folders/{folder_id}"
         gdown.download_folder(url, output=local_model_path, quiet=False)
         logger.info("Model files downloaded successfully to %s", local_model_path)
         st.write("Model files downloaded successfully to", local_model_path)
