@@ -30,14 +30,15 @@ def download_dataset_from_kaggle():
         kaggle_username = os.getenv('KAGGLE_USERNAME')
         kaggle_key = os.getenv('KAGGLE_KEY')
         
-        # Log the credentials (for debugging, without exposing the key)
-        logger.info(f"KAGGLE_USERNAME: {'Set' if kaggle_username else 'Not set'}")
+        # Log the credentials for debugging
+        logger.info(f"KAGGLE_USERNAME value: {kaggle_username}")
         logger.info(f"KAGGLE_KEY: {'Set' if kaggle_key else 'Not set'}")
         
         # Check if credentials are set
         if not kaggle_username or not kaggle_key:
             error_msg = (
-                "Kaggle API credentials are missing or invalid. "
+                f"Kaggle API credentials are missing or invalid. "
+                f"Current KAGGLE_USERNAME: {kaggle_username}, KAGGLE_KEY: {'Set' if kaggle_key else 'Not set'}. "
                 "Please ensure KAGGLE_USERNAME and KAGGLE_KEY are set correctly in Hugging Face Spaces. "
                 "Go to Settings > Variables and secrets, and verify the values. "
                 "KAGGLE_USERNAME should be 'anasdahmani', and KAGGLE_KEY should be your Kaggle API key from kaggle.json."
@@ -47,8 +48,8 @@ def download_dataset_from_kaggle():
             raise ValueError(error_msg)
         
         # Set the environment variables for the Kaggle API
-        os.environ['anasdahmani'] = kaggle_username
-        os.environ['1f556ae19a6e6c6bcf8298d6bcd20d08'] = kaggle_key
+        os.environ['KAGGLE_USERNAME'] = kaggle_username
+        os.environ['KAGGLE_KEY'] = kaggle_key
         
         # Install kaggle package if not already installed
         logger.info("Installing kaggle package...")
@@ -177,7 +178,7 @@ input_text = st.text_area("Enter the text you want to paraphrase:", height=200)
 
 # Options
 splitting_mode = st.selectbox("Splitting Mode:", ["Automatic", "Manual"])
-num_sentences = st.number_input("Number of Sentences (if Manual):", min_value=1, value=3, step=1)  # Replaced slider with number_input
+num_sentences = st.number_input("Number of Sentences (if Manual):", min_value=1, value=3, step=1)
 creativity_level = st.selectbox("Creativity Level:", ["Low", "Medium", "High"])
 apply_grammar_correction = st.checkbox("Apply Grammar Correction", value=True)
 mother_tongue = st.selectbox("Mother Tongue (for grammar correction):", ["Arabic", "English", "Spanish", "French", "German"])
@@ -186,15 +187,19 @@ mother_tongue = st.selectbox("Mother Tongue (for grammar correction):", ["Arabic
 if st.button("Paraphrase"):
     if input_text.strip():
         with st.spinner("Loading model and paraphrasing..."):
-            model, tokenizer = load_model_and_tokenizer()
-            paraphrased_text = paraphrase_text(
-                model, tokenizer, input_text, creativity_level, num_sentences,
-                splitting_mode, apply_grammar_correction, mother_tongue
-            )
-        
-        st.write("### Original Text:")
-        st.write(input_text)
-        st.write("### Paraphrased Text:")
-        st.write(paraphrased_text)
+            try:
+                model, tokenizer = load_model_and_tokenizer()
+                paraphrased_text = paraphrase_text(
+                    model, tokenizer, input_text, creativity_level, num_sentences,
+                    splitting_mode, apply_grammar_correction, mother_tongue
+                )
+                
+                st.write("### Original Text:")
+                st.write(input_text)
+                st.write("### Paraphrased Text:")
+                st.write(paraphrased_text)
+            except Exception as e:
+                st.error(f"An error occurred during paraphrasing: {str(e)}")
+                logger.error(f"Paraphrasing error: {str(e)}")
     else:
         st.error("Please enter some text to paraphrase.")
