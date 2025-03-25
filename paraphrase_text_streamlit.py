@@ -4,6 +4,7 @@ import nltk
 import language_tool_python
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 import logging
+import gdown
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -15,44 +16,48 @@ nltk.download('punkt', quiet=True)
 logger.info("NLTK punkt data downloaded successfully.")
 
 # Set up paths
-dataset_path = "oniel2020/paraphraseai"  # Root directory
-persistent_path = "/data"  # Persistent storage in Hugging Face Spaces
+local_model_path = "/mount/src/paraphrase-tool-app/t5-finetuned-quora-cleaned-temp"  # Local directory to store the model files
+os.makedirs(local_model_path, exist_ok=True)
 
-# Debug: List files in dataset_path
-logger.info("Listing files in %s...", dataset_path)
-try:
-    files = os.listdir(dataset_path)
-    logger.info("Files in %s: %s", dataset_path, files)
-    st.write("Files in dataset_path (/mount/src/paraphrase-tool-app/):", files)
-    if "config.json" not in files:
-        st.error("config.json is missing in the dataset_path!")
-except Exception as e:
-    error_msg = f"Error listing files in {dataset_path}: {str(e)}"
-    logger.error(error_msg)
-    st.error(error_msg)
+# Download model files from Google Drive
+def download_model_files():
+    logger.info("Downloading model files from Google Drive...")
+    try:
+        # Replace with your Google Drive folder ID
+        folder_id = "1aBcDeFgHiJkLmNoPqRsTuVwXyZ"  # Replace with your actual folder ID
+        url = f"https://drive.google.com/drive/folders/1dCTBzHbQcJca9Bub2gyYgrFfkW5Qj59l?usp=sharing"
+        gdown.download_folder(url, output=local_model_path, quiet=False)
+        logger.info("Model files downloaded successfully to %s", local_model_path)
+        st.write("Model files downloaded successfully to", local_model_path)
 
-# Debug: List files in persistent_path
-logger.info("Listing files in %s...", persistent_path)
-try:
-    persistent_files = os.listdir(persistent_path)
-    logger.info("Files in %s: %s", persistent_path, persistent_files)
-    st.write("Files in persistent_path (/data/):", persistent_files)
-    if "config.json" in persistent_files:
-        st.write("Found config.json in /data/. Updating dataset_path...")
-        dataset_path = persistent_path
-except Exception as e:
-    error_msg = f"Error listing files in {persistent_path}: {str(e)}"
-    logger.error(error_msg)
-    st.error(error_msg)
+        # List files to confirm
+        files = os.listdir(local_model_path)
+        logger.info("Files in %s: %s", local_model_path, files)
+        st.write("Files in model directory:", files)
+        if "config.json" not in files:
+            st.error("config.json is missing in the downloaded files!")
+        if "spiece.model" not in files:
+            st.error("spiece.model is missing in the downloaded files!")
+        if "model.safetensors" not in files and "pytorch_model.bin" not in files:
+            st.error("Model weights file (model.safetensors or pytorch_model.bin) is missing in the downloaded files!")
+    except Exception as e:
+        error_msg = f"Error downloading model files: {str(e)}"
+        logger.error(error_msg)
+        st.error(error_msg)
+        raise
+
+# Download the model files if they don't already exist
+if not os.path.exists(os.path.join(local_model_path, "config.json")):
+    download_model_files()
 
 # Load the model and tokenizer
 @st.cache_resource
 def load_model_and_tokenizer():
-    logger.info("Loading model and tokenizer from %s...", dataset_path)
+    logger.info("Loading model and tokenizer from %s...", local_model_path)
     try:
-        # Load the model and tokenizer from the directory
-        model = T5ForConditionalGeneration.from_pretrained(dataset_path, device_map="auto")
-        tokenizer = T5Tokenizer.from_pretrained(dataset_path)
+        # Load the model and tokenizer from the local directory
+        model = T5ForConditionalGeneration.from_pretrained(local_model_path, device_map="auto")
+        tokenizer = T5Tokenizer.from_pretrained(local_model_path)
         logger.info("Model and tokenizer loaded successfully.")
         return model, tokenizer
     except Exception as e:
