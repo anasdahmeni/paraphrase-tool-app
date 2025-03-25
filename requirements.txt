@@ -1,5 +1,5 @@
-streamlit
-transformers
-nltk
-language-tool-python
-kaggle
+streamlit==1.36.0
+transformers==4.44.2
+torch==2.4.1
+nltk==3.9.1
+language-tool-python==2.8.1
