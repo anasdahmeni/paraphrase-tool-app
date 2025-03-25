@@ -2,3 +2,4 @@ streamlit
 transformers
 nltk
 language-tool-python
+kaggle
