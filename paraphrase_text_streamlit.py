@@ -15,7 +15,7 @@ nltk.download('punkt', quiet=True)
 logger.info("NLTK punkt data downloaded successfully.")
 
 # Set up paths
-dataset_path = "/mount/src/paraphrase-tool-app"  # Root directory
+dataset_path = "oniel2020/paraphraseai"  # Root directory
 persistent_path = "/data"  # Persistent storage in Hugging Face Spaces
 
 # Debug: List files in dataset_path
