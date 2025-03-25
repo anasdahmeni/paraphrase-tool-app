@@ -5,6 +5,7 @@ import language_tool_python
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 import logging
 import gdown
+import time
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -19,13 +20,20 @@ logger.info("NLTK punkt data downloaded successfully.")
 local_model_path = "/mount/src/paraphrase-tool-app/t5-finetuned-quora-cleaned-temp"  # Local directory to store the model files
 os.makedirs(local_model_path, exist_ok=True)
 
+# List of expected files
+expected_files = [
+    "config.json",
+    "spiece.model",
+    "model.safetensors",  # We know this is the weights file based on the logs
+]
+
 # Download model files from Google Drive
 def download_model_files():
     logger.info("Downloading model files from Google Drive...")
     try:
         # Replace with your Google Drive folder ID
-        folder_id = "1aBcDeFgHiJkLmNoPqRsTuVwXyZ"  # Replace with your actual folder ID
-        url = f"https://drive.google.com/drive/folders/1dCTBzHbQcJca9Bub2gyYgrFfkW5Qj59l?usp=sharing"
+        folder_id = "1Ab-vaLKkrv0eflaVS-F1s1C3-IWaXR1I"  # Extracted from the logs
+        url = f"https://drive.google.com/drive/folders/1dCTBzHbQcJca9Bub2gyYgrFfkW5Qj59l?usp=drive_link"
         gdown.download_folder(url, output=local_model_path, quiet=False)
         logger.info("Model files downloaded successfully to %s", local_model_path)
         st.write("Model files downloaded successfully to", local_model_path)
@@ -34,12 +42,12 @@ def download_model_files():
         files = os.listdir(local_model_path)
         logger.info("Files in %s: %s", local_model_path, files)
         st.write("Files in model directory:", files)
-        if "config.json" not in files:
-            st.error("config.json is missing in the downloaded files!")
-        if "spiece.model" not in files:
-            st.error("spiece.model is missing in the downloaded files!")
-        if "model.safetensors" not in files and "pytorch_model.bin" not in files:
-            st.error("Model weights file (model.safetensors or pytorch_model.bin) is missing in the downloaded files!")
+
+        # Check for required files
+        for required_file in expected_files:
+            if required_file not in files:
+                st.error(f"{required_file} is missing in the downloaded files!")
+                raise FileNotFoundError(f"{required_file} is missing in {local_model_path}")
     except Exception as e:
         error_msg = f"Error downloading model files: {str(e)}"
         logger.error(error_msg)
@@ -47,8 +55,23 @@ def download_model_files():
         raise
 
 # Download the model files if they don't already exist
-if not os.path.exists(os.path.join(local_model_path, "config.json")):
+if not all(os.path.exists(os.path.join(local_model_path, f)) for f in expected_files):
     download_model_files()
+
+# Wait until model.safetensors is fully downloaded
+def wait_for_model_file():
+    model_file = os.path.join(local_model_path, "model.safetensors")
+    timeout = 300  # Wait up to 5 minutes
+    start_time = time.time()
+    while not os.path.exists(model_file):
+        elapsed_time = time.time() - start_time
+        if elapsed_time > timeout:
+            raise TimeoutError(f"Timed out waiting for {model_file} to download after {timeout} seconds")
+        logger.info("Waiting for model.safetensors to download...")
+        st.write("Waiting for model.safetensors to download...")
+        time.sleep(5)  # Check every 5 seconds
+
+wait_for_model_file()
 
 # Load the model and tokenizer
 @st.cache_resource
