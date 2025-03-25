@@ -7,14 +7,24 @@ import logging
 import gdown
 import time
 
+# Check if sentencepiece is installed
+try:
+    import sentencepiece
+    st.write("SentencePiece is installed successfully.")
+    logger.info("SentencePiece is installed successfully.")
+except ImportError:
+    st.error("SentencePiece is not installed. Please add 'sentencepiece' to requirements.txt and restart the Space.")
+    raise ImportError("SentencePiece is not installed. Please add 'sentencepiece' to requirements.txt and restart the Space.")
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Download NLTK data
-logger.info("Downloading NLTK punkt data...")
+logger.info("Downloading NLTK punkt and punkt_tab data...")
 nltk.download('punkt', quiet=True)
-logger.info("NLTK punkt data downloaded successfully.")
+nltk.download('punkt_tab', quiet=True)  # Added to download punkt_tab
+logger.info("NLTK punkt and punkt_tab data downloaded successfully.")
 
 # Set up paths
 local_model_path = "/mount/src/paraphrase-tool-app/t5-finetuned-quora-cleaned-temp"  # Local directory to store the model files
@@ -33,7 +43,7 @@ def download_model_files():
     try:
         # Replace with your Google Drive folder ID
         folder_id = "1Ab-vaLKkrv0eflaVS-F1s1C3-IWaXR1I"  # Extracted from the logs
-        url = f"https://drive.google.com/drive/folders/{folder_id}"
+        url = f"https://drive.google.com/drive/folders/1dCTBzHbQcJca9Bub2gyYgrFfkW5Qj59l?usp=drive_link"
         gdown.download_folder(url, output=local_model_path, quiet=False)
         logger.info("Model files downloaded successfully to %s", local_model_path)
         st.write("Model files downloaded successfully to", local_model_path)
@@ -104,7 +114,12 @@ def load_grammar_tool():
 
 # Function to split text into sentences
 def split_into_sentences(text, mode, num_sentences):
-    sentences = nltk.sent_tokenize(text)
+    try:
+        sentences = nltk.sent_tokenize(text)
+    except LookupError as e:
+        st.error(f"Failed to tokenize text: {str(e)}")
+        logger.error(f"Failed to tokenize text: {str(e)}")
+        raise
     if mode == "Manual":
         if num_sentences <= 0:
             num_sentences = 1
