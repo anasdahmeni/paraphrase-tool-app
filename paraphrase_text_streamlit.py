@@ -7,15 +7,6 @@ import logging
 import gdown
 import time
 
-# Check if sentencepiece is installed
-try:
-    import sentencepiece
-    st.write("SentencePiece is installed successfully.")
-    logger.info("SentencePiece is installed successfully.")
-except ImportError:
-    st.error("SentencePiece is not installed. Please add 'sentencepiece' to requirements.txt and restart the Space.")
-    raise ImportError("SentencePiece is not installed. Please add 'sentencepiece' to requirements.txt and restart the Space.")
-
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
