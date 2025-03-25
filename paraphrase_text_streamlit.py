@@ -1,3 +1,4 @@
+pip install accelerate
 import streamlit as st
 import os
 import nltk
