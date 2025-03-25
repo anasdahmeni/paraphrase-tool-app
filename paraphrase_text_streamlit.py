@@ -15,14 +15,42 @@ nltk.download('punkt', quiet=True)
 logger.info("NLTK punkt data downloaded successfully.")
 
 # Set up paths
-dataset_path = "/mount/src/paraphrase-tool-app"  # Updated path to the root directory
+dataset_path = "/mount/src/paraphrase-tool-app"  # Root directory
+persistent_path = "/data"  # Persistent storage in Hugging Face Spaces
+
+# Debug: List files in dataset_path
+logger.info("Listing files in %s...", dataset_path)
+try:
+    files = os.listdir(dataset_path)
+    logger.info("Files in %s: %s", dataset_path, files)
+    st.write("Files in dataset_path (/mount/src/paraphrase-tool-app/):", files)
+    if "config.json" not in files:
+        st.error("config.json is missing in the dataset_path!")
+except Exception as e:
+    error_msg = f"Error listing files in {dataset_path}: {str(e)}"
+    logger.error(error_msg)
+    st.error(error_msg)
+
+# Debug: List files in persistent_path
+logger.info("Listing files in %s...", persistent_path)
+try:
+    persistent_files = os.listdir(persistent_path)
+    logger.info("Files in %s: %s", persistent_path, persistent_files)
+    st.write("Files in persistent_path (/data/):", persistent_files)
+    if "config.json" in persistent_files:
+        st.write("Found config.json in /data/. Updating dataset_path...")
+        dataset_path = persistent_path
+except Exception as e:
+    error_msg = f"Error listing files in {persistent_path}: {str(e)}"
+    logger.error(error_msg)
+    st.error(error_msg)
 
 # Load the model and tokenizer
 @st.cache_resource
 def load_model_and_tokenizer():
     logger.info("Loading model and tokenizer from %s...", dataset_path)
     try:
-        # Load the model and tokenizer from the directory containing model.safetensors
+        # Load the model and tokenizer from the directory
         model = T5ForConditionalGeneration.from_pretrained(dataset_path, device_map="auto")
         tokenizer = T5Tokenizer.from_pretrained(dataset_path)
         logger.info("Model and tokenizer loaded successfully.")
